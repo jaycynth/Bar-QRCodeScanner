@@ -43,25 +43,26 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         start = (Button) findViewById(R.id.start);
         camera = (CameraView) findViewById(R.id.camera);
 
+
+        scannerView = new ZXingScannerView(this);
+        camera.bindCameraKitListener(scannerView);
+
         start.setOnClickListener(v -> {
-            scannerView = new ZXingScannerView(this);
-            camera.bindCameraKitListener(scannerView);
-            camera.start();
-            camera.captureImage();
+            setContentView(scannerView);
+            scannerView.setResultHandler(this);
+            scannerView.startCamera();
+
         });
         camera.addCameraKitListener(new CameraKitEventListener() {
             @Override
             public void onEvent(CameraKitEvent cameraKitEvent) {
-
             }
 
             @Override
             public void onError(CameraKitError cameraKitError) {
-
             }
 
             @Override
@@ -98,20 +99,20 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     @Override
     public void onResume() {
         super.onResume();
-
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentapiVersion >= android.os.Build.VERSION_CODES.M) {
-            if (checkPermission()) {
-                if (scannerView == null) {
-                    scannerView = new ZXingScannerView(this);
-                    setContentView(scannerView);
-                }
-                scannerView.setResultHandler(this);
-                scannerView.startCamera();
-            } else {
-                requestPermission();
-            }
-        }
+//
+//        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+//        if (currentapiVersion >= android.os.Build.VERSION_CODES.M) {
+//            if (checkPermission()) {
+//                if (scannerView == null) {
+//                    scannerView = new ZXingScannerView(this);
+//                    setContentView(scannerView);
+//                }
+//                scannerView.setResultHandler(this);
+//                scannerView.startCamera();
+//            } else {
+//                requestPermission();
+//            }
+//        }
     }
 
     @Override
@@ -170,12 +171,20 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
                 scannerView.resumeCameraPreview(MainActivity.this);});
         builder.setNeutralButton("DONE", (dialog, which) -> {
             camera.stop();
-//            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(myResult));
-//            startActivity(browserIntent);
+            setContentView(R.layout.activity_main);
+
+
 
         });
         builder.setMessage(result.getText());
         AlertDialog alert1 = builder.create();
         alert1.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        setContentView(R.layout.activity_main);
+
+       // super.onBackPressed();
     }
 }
